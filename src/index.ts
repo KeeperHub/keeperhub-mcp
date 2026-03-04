@@ -233,7 +233,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: 'update_workflow',
         description:
-          'Update an existing Web3 workflow configuration, including triggers, actions, conditions, and blockchain parameters.',
+          'Update an existing Web3 workflow configuration, including triggers, actions, conditions, and blockchain parameters. Use enabled=true/false to activate or pause a workflow.',
         inputSchema: {
           type: 'object',
           properties: {
@@ -248,6 +248,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             description: {
               type: 'string',
               description: 'Updated description',
+            },
+            enabled: {
+              type: 'boolean',
+              description: 'Enable or disable the workflow (true = active, false = paused)',
             },
             project_id: {
               type: ['string', 'null'],

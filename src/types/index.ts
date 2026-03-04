@@ -23,31 +23,88 @@ export interface Workflow {
   organizationId: string;
   projectId?: string | null;
   tagId?: string | null;
+  enabled?: boolean;
   nodes?: WorkflowNode[];
   edges?: WorkflowEdge[];
   createdAt: string;
   updatedAt: string;
 }
 
+export type ExecutionStatus = 'pending' | 'running' | 'success' | 'error' | 'cancelled';
+
 export interface WorkflowExecution {
   id: string;
   workflowId: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
-  input?: Record<string, unknown>;
-  output?: Record<string, unknown>;
-  error?: string;
-  startedAt?: string;
-  completedAt?: string;
-  createdAt: string;
+  userId: string;
+  status: ExecutionStatus;
+  input?: unknown;
+  output?: unknown;
+  error?: string | null;
+  startedAt: string;
+  completedAt?: string | null;
+  duration?: string | null;
+  totalSteps?: string | null;
+  completedSteps?: string | null;
+  currentNodeId?: string | null;
+  currentNodeName?: string | null;
+  lastSuccessfulNodeId?: string | null;
+  lastSuccessfulNodeName?: string | null;
+  executionTrace?: string[] | null;
+  runId?: string | null;
+}
+
+export type NodeExecutionStatus = 'pending' | 'running' | 'success' | 'error';
+
+export interface NodeStatus {
+  nodeId: string;
+  status: NodeExecutionStatus;
+}
+
+export interface ExecutionProgress {
+  totalSteps: number;
+  completedSteps: number;
+  runningSteps: number;
+  currentNodeId: string | null;
+  currentNodeName: string | null;
+  percentage: number;
+}
+
+export interface ExecutionErrorContext {
+  failedNodeId: string | null;
+  lastSuccessfulNodeId: string | null;
+  lastSuccessfulNodeName: string | null;
+  executionTrace: string[] | null;
+  error: string | null;
+}
+
+export interface ExecutionStatusResponse {
+  status: ExecutionStatus;
+  nodeStatuses: NodeStatus[];
+  progress: ExecutionProgress;
+  errorContext: ExecutionErrorContext | null;
 }
 
 export interface ExecutionLog {
   id: string;
   executionId: string;
-  level: 'info' | 'warn' | 'error' | 'debug';
-  message: string;
+  nodeId: string;
+  nodeName: string;
+  nodeType: string;
+  status: NodeExecutionStatus;
+  input?: unknown;
+  output?: unknown;
+  error?: string | null;
+  startedAt: string;
+  completedAt?: string | null;
+  duration?: string | null;
   timestamp: string;
-  metadata?: Record<string, unknown>;
+  iterationIndex?: number | null;
+  forEachNodeId?: string | null;
+}
+
+export interface ExecutionLogsResponse {
+  execution: WorkflowExecution;
+  logs: ExecutionLog[];
 }
 
 export interface GenerateWorkflowRequest {
@@ -86,6 +143,7 @@ export interface UpdateWorkflowParams {
   description?: string;
   projectId?: string | null;
   tagId?: string | null;
+  enabled?: boolean;
   nodes?: WorkflowNode[];
   edges?: WorkflowEdge[];
 }
@@ -93,6 +151,11 @@ export interface UpdateWorkflowParams {
 export interface ExecuteWorkflowParams {
   workflowId: string;
   input?: Record<string, unknown>;
+}
+
+export interface ExecuteWorkflowResponse {
+  executionId: string;
+  status: 'running';
 }
 
 // Integration types
