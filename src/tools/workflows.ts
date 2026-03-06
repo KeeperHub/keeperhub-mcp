@@ -40,6 +40,7 @@ export const updateWorkflowSchema = z.object({
   workflow_id: z.string().describe('The ID of the workflow to update'),
   name: z.string().optional().describe('New name for the workflow'),
   description: z.string().optional().describe('New description'),
+  enabled: z.boolean().optional().describe('Enable or disable the workflow (true = active, false = paused)'),
   project_id: z.string().optional().nullable().describe('Project ID to assign the workflow to (null to unassign)'),
   tag_id: z.string().optional().nullable().describe('Tag ID to assign to the workflow (null to unassign)'),
   nodes: z.array(WorkflowNodeSchema).optional().describe('Updated workflow nodes'),
@@ -98,11 +99,13 @@ const ACTION_FIELD_CORRECTIONS: Record<string, Record<string, string>> = {
   },
   'web3/transfer-funds': {
     chainId: 'network',
-    to: 'toAddress',
+    to: 'recipientAddress',
+    toAddress: 'recipientAddress',
   },
   'web3/transfer-token': {
     chainId: 'network',
-    to: 'toAddress',
+    to: 'recipientAddress',
+    toAddress: 'recipientAddress',
   },
   'web3/read-contract': {
     chainId: 'network',
@@ -712,6 +715,7 @@ export async function handleUpdateWorkflow(
     workflowId: workflow_id,
     name: updateData.name,
     description: updateData.description,
+    enabled: updateData.enabled,
     projectId: args.project_id,
     tagId: args.tag_id,
     nodes: layoutedNodes,
