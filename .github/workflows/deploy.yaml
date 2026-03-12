@@ -106,8 +106,9 @@ jobs:
           cache-from: type=registry,ref=${{ steps.login-ecr.outputs.registry }}/${{ env.AWS_ECR_NAME }}:cache
           cache-to: type=registry,ref=${{ steps.login-ecr.outputs.registry }}/${{ env.AWS_ECR_NAME }}:cache,mode=max
 
+      # ── Sky/maker cluster deploy (prod only — staging migrated to TechOps) ──
       - name: Replace variables in the Helm values file
-        if: ${{ !contains(github.event.head_commit.message, '[skip deploy]') }}
+        if: ${{ github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[skip deploy]') }}
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ steps.vars.outputs.sha_short }}
@@ -118,12 +119,12 @@ jobs:
           sed -i 's|${SERVICE_ACCOUNT_ROLE_ARN}|'"$SERVICE_ACCOUNT_ROLE_ARN"'|g' $HELM_FILE
 
       - name: Configure kubectl
-        if: ${{ !contains(github.event.head_commit.message, '[skip deploy]') }}
+        if: ${{ github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[skip deploy]') }}
         run: |
           aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.REGION }}
 
       - name: Deploy to Kubernetes with Helm
-        if: ${{ !contains(github.event.head_commit.message, '[skip deploy]') }}
+        if: ${{ github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[skip deploy]') }}
         uses: bitovi/github-actions-deploy-eks-helm@v1.2.10
         with:
           cluster-name: ${{ env.CLUSTER_NAME }}
